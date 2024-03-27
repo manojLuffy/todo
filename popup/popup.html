@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Task Slayer</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <h1><img src="../img/logo.png" alt="Task Slayer Logo"> Task Slayer</h1>
+  <div id="input-container"> 
+    <input type="text" id="new-task" placeholder="Enter a new task">
+    <img src="../img/add.svg" alt="Add Task" id="add-task">
+  </div>
+
+  <ul id="task-list"></ul>
+
+  <div id="slayed-task-heading">Slayed Tasks (<span id="completed-task-count">0</span>)</div>
+  <p id="quirky-text" style="display: none;">You didn't do any tasks yet!</p>
+
+  <ul id="slayed-task-list"></ul>
+
+
+
+  <script src="popup.js"></script>
+</body>
+</html>
