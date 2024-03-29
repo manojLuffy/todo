@@ -4,7 +4,7 @@
   "description": "Manage your tasks easily with this simple and fun to-do app.",
   "version": "1.0",
 
-  "permissions": ["storage"],
+  "permissions": ["storage", "alarms", "notifications", "tabs"],
 
   "background": {
     "service_worker": "background.js"

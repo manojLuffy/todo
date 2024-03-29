@@ -3,8 +3,6 @@ const slayedTaskList = document.getElementById('slayed-task-list');
 const newTaskInput = document.getElementById('new-task');
 const addTaskButton = document.getElementById('add-task');
 
-
-
 // Add task functionality
 addTaskButton.addEventListener('click', () => {
   const taskText = newTaskInput.value.trim();
@@ -44,24 +42,25 @@ function addTaskToList(taskText, completed = false) {
 
   const completeButton = createButton('../img/complete.svg', () => {
     listItem.classList.toggle('completed');
+
+    // Remove the task from its current list
+    const currentList = listItem.parentNode;
+    currentList.removeChild(listItem);
+
     const targetList = listItem.classList.contains('completed') ? slayedTaskList : taskList;
     targetList.appendChild(listItem); // Move to the appropriate list
+
     updateTasksInStorage();
     updateCompletedTaskCount(); // Update the completed task count
     toggleQuirkyText(); // Toggle quirky text display
   });
 
   const removeButton = createButton('../img/remove.svg', () => {
-    listItem.classList.add('animate-remove');
-    // Function to remove the list item after animation
-    const removeListItem = () => {
-      listItem.remove();
-      updateTasksInStorage();
-      updateCompletedTaskCount(); // Update the completed task count
-      toggleQuirkyText(); // Toggle quirky text display
-    };
-    // Ensure animation class is removed before actual removal
-    listItem.addEventListener('animationend', removeListItem, { once: true }); // Use { once: true } to remove the listener after it's triggered
+    const currentList = listItem.parentNode;
+    currentList.removeChild(listItem);
+    updateTasksInStorage();
+    updateCompletedTaskCount();
+    toggleQuirkyText();
   });
 
   // Create a div to group the buttons
@@ -70,7 +69,7 @@ function addTaskToList(taskText, completed = false) {
   groupedButtons.appendChild(completeButton);
   groupedButtons.appendChild(removeButton);
   listItem.appendChild(groupedButtons); // Add the grouped buttons to the list item
-  
+
   // Determine which list to add the task to based on completion status
   if (completed) {
     listItem.classList.add('completed');
@@ -98,7 +97,6 @@ function toggleQuirkyText() {
     quirkyText.style.display = 'none'; // Hide quirky text if there are completed tasks
   }
 }
-
 
 // Helper function to create buttons
 function createButton(imgSrc, onClick) {
