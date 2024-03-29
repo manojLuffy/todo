@@ -55,14 +55,23 @@ h1 img {
   padding: 6px;
   margin-bottom: 8px;
   background-color: #fff;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
   font-size: 16px;
   display: flex;
   justify-content: space-between;
-  align-items: center; /* Ensure vertical alignment */
+  align-items: center;
   transition: all 0.4s ease;
 }
+
+#task-list li:hover {
+  transform: scale(1.02); /* Scale up on hover */
+}
+
+#slayed-task-list li:hover {
+  transform: scale(1.02); /* Scale up on hover */
+}
+
 
 #task-list li.completed,
 #slayed-task-list li.completed {
@@ -116,12 +125,28 @@ h1 img {
   display: flex; /* Group the buttons horizontally */
 }
 
-.animate-remove {
-  animation: fadeOut 0.3s ease-in-out;
+@keyframes shrinkAndFade {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
 }
+
+.animate-remove {
+  animation: shrinkAndFade 0.5s ease-in-out !important; /* Increased duration and added !important */
+}
+
 
 .animate-add {
   animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-transition {
+  animation: slideHorizontal 0.3s ease-in-out;
 }
 
 @keyframes fadeIn {
@@ -130,11 +155,46 @@ h1 img {
 }
 
 @keyframes fadeOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes slideHorizontal {
   from {
-      opacity: 1;
+    transform: translateX(-100%);
   }
   to {
-      opacity: 0;
-      transform: scale(0.8);
+    transform: translateX(0);
   }
+}
+
+.animate-scale {
+  animation: scaleDown 0.3s ease-in-out;
+}
+
+@keyframes scaleDown {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0.8);
+  }
+}
+
+/* popup.css */
+#points-container {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 18px;
+  font-weight: bold;
 }

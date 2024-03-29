@@ -26,11 +26,15 @@ newTaskInput.addEventListener('keypress', (e) => {
 });
 
 // Load tasks from storage
-chrome.storage.sync.get('tasks', (data) => {
+chrome.storage.sync.get(['tasks', 'points'], (data) => {
   if (data.tasks) {
     data.tasks.forEach((task) => {
-      addTaskToList(task.text, task.completed); // Pass the task text and completion status
+      addTaskToList(task.text, task.completed);
     });
+  }
+
+  if (data.points) {
+    document.getElementById('points').textContent = data.points;
   }
 });
 
@@ -49,18 +53,22 @@ function addTaskToList(taskText, completed = false) {
 
     const targetList = listItem.classList.contains('completed') ? slayedTaskList : taskList;
     targetList.appendChild(listItem); // Move to the appropriate list
+    animateListItemTransition(listItem, targetList); // Animate the transition
 
     updateTasksInStorage();
     updateCompletedTaskCount(); // Update the completed task count
     toggleQuirkyText(); // Toggle quirky text display
+    updatePoints(); // Update the user's points
   });
 
   const removeButton = createButton('../img/remove.svg', () => {
     const currentList = listItem.parentNode;
+    animateListItemRemoval(listItem); // Call the animation function before removing the item
     currentList.removeChild(listItem);
     updateTasksInStorage();
     updateCompletedTaskCount();
     toggleQuirkyText();
+    updatePoints(); // Update the user's points
   });
 
   // Create a div to group the buttons
@@ -78,8 +86,49 @@ function addTaskToList(taskText, completed = false) {
     taskList.appendChild(listItem);
   }
 
+  animateListItemAddition(listItem); // Animate the addition
+
   updateCompletedTaskCount(); // Update the completed task count
   toggleQuirkyText(); // Toggle quirky text display
+  updatePoints(); // Update the user's points
+}
+
+function updatePoints() {
+  chrome.storage.sync.get('points', (data) => {
+    let points = data.points || 0;
+    const completedTasks = slayedTaskList.querySelectorAll('li.completed').length;
+    points = completedTasks * 10; // Update points based on completed tasks
+    document.getElementById('points').textContent = points;
+    chrome.storage.sync.set({ points });
+  });
+}
+
+// Helper function to animate list item addition
+function animateListItemAddition(listItem) {
+  
+    listItem.classList.add('animate-add');
+ 
+}
+
+// Helper function to animate list item transition
+function animateListItemTransition(listItem, targetList) {
+  listItem.style.transition = 'transform 0.3s ease-in-out';
+  listItem.style.transform = 'translateX(100%)';
+  setTimeout(() => {
+    listItem.style.transform = 'translateX(0)';
+    targetList.appendChild(listItem);
+  }, 10);
+}
+
+// Helper function to animate list item removal
+
+function animateListItemRemoval(listItem) {
+  listItem.classList.add('animate-remove'); // Add the animation class
+  listItem.addEventListener('animationend', () => {
+    setTimeout(() => {
+    listItem.remove(); // Remove thbackground.js content.js manifest.json popup README.mde item after the animation completes
+    }, 300);
+  });
 }
 
 // Helper function to update the completed task count
@@ -108,10 +157,23 @@ function createButton(imgSrc, onClick) {
   return button;
 }
 
-// Update tasks in storage
 function updateTasksInStorage() {
   const tasks = [];
-  taskList.querySelectorAll('li').forEach(task => tasks.push({ text: task.innerText, completed: task.classList.contains('completed') }));
-  slayedTaskList.querySelectorAll('li').forEach(task => tasks.push({ text: task.innerText, completed: task.classList.contains('completed') }));
-  chrome.storage.sync.set({ tasks });
+  let points = 0; // Initialize points to 0
+
+  taskList.querySelectorAll('li').forEach(task => {
+    tasks.push({ text: task.innerText, completed: task.classList.contains('completed') });
+    if (task.classList.contains('completed')) {
+      points += 10; // Award 10 points for each completed task
+    }
+  });
+
+  slayedTaskList.querySelectorAll('li').forEach(task => {
+    tasks.push({ text: task.innerText, completed: task.classList.contains('completed') });
+    if (task.classList.contains('completed')) {
+      points += 10; // Award 10 points for each completed task
+    }
+  });
+
+  chrome.storage.sync.set({ tasks, points });
 }
