@@ -33,9 +33,9 @@ chrome.storage.sync.get(['tasks', 'points'], (data) => {
     });
   }
 
-  if (data.points) {
-    document.getElementById('points').textContent = data.points;
-  }
+  // if (data.points) {
+  //   document.getElementById('points').textContent = data.points;
+  // }
 });
 
 // Function to add task to the list
