@@ -1,26 +1,52 @@
 <!-- popup.html -->
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Task Slayer</title>
-  <link rel="stylesheet" href="popup.css">
-</head>
-<body>
-  <h1><img src="../img/logo.png" alt="Task Slayer Logo"> Task Slayer</h1>
-  <div id="input-container">
-    <input type="text" id="new-task" placeholder="Enter a new task">
-    <img src="../img/add.svg" alt="Add Task" id="add-task">
-  </div>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Task Slayer</title>
+		<link rel="stylesheet" href="popup.css" />
+	</head>
+	<body>
+		<h1>
+			<img src="../img/logo.png" alt="Task Slayer Logo" />
+			<div>Task Slayer</div>
+			<div class="switch">
+				<label class="theme-switch" for="checkbox">
+					<input type="checkbox" id="checkbox" />
+					<div class="slider round"></div>
+				</label>
+			</div>
+		</h1>
+		<div id="gamification">
+			<div id="points-animation-container"></div>
+			<div id="level-info">
+				<span id="level-name">Apprentice Slayer</span>
+				<div title="Slayer Points!" id="slayer-points">0 SP</div>
+			</div>
+			<div id="progress-bar">
+				<div id="level-progress"></div>
+			</div>
+		</div>
+		<div id="level-up-modal" class="modal">
+			<div class="modal-content">
+				<div id="confetti-container"></div>
+				<h2 class="congrats">Congrats, Slayer!</h2>
+				<p>You've leveled up to <span id="new-level-name" class="new-level"></span>!</p>
+				<button id="close-modal">Awesome!</button>
+			</div>
+		</div>
+		<div id="input-container">
+			<input type="text" id="new-task" placeholder="Enter a new task" />
+			<img src="../img/add.svg" alt="Add Task" id="add-task" />
+		</div>
 
-  <ul id="task-list"></ul>
+		<ul id="task-list"></ul>
 
-  <div id="slayed-task-heading">Slayed Tasks (<span id="completed-task-count">0</span>)</div>
-  <!-- <div id="points-container">Points: <span id="points">0</span></div> -->
-  <p id="quirky-text" style="display: none;">Zero tasks defeated? Let's turn that around and become the ultimate Task Slayer!</p>
+		<div id="slayed-task-heading">Slayed Tasks (<span id="completed-task-count">0</span>)</div>
+		<p id="quirky-text" style="display: none">Zero tasks defeated? Let's turn that around and become the ultimate Task Slayer!</p>
 
-  <ul id="slayed-task-list"></ul>
+		<ul id="slayed-task-list"></ul>
 
-  <script src="popup.js"></script>
-</body>
+		<script src="popup.js"></script>
+	</body>
 </html>

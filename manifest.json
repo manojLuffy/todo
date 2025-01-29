@@ -1,17 +1,17 @@
 {
-  "manifest_version": 3,
-  "name": "Task Slayer",
-  "description": "Manage your tasks easily with this simple and fun to-do app.",
-  "version": "1.0",
+	"manifest_version": 3,
+	"name": "Task Slayer",
+	"description": "Manage your tasks easily with this simple and fun to-do app.",
+	"version": "1.0",
 
-  "permissions": ["storage", "alarms", "notifications", "tabs"],
+	"permissions": ["storage", "alarms", "notifications", "tabs"],
 
-  "background": {
-    "service_worker": "background.js"
-  },
+	"background": {
+		"service_worker": "background.js"
+	},
 
-  "action": {
-    "default_icon": "img/icon16.jpg",
-    "default_popup": "popup/popup.html"
-  }
+	"action": {
+		"default_icon": "img/logo.png",
+		"default_popup": "popup/popup.html"
+	}
 }
