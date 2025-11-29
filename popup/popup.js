@@ -19,6 +19,9 @@ const numberOfConfetti = 30; // Adjust as needed
 
 // Audio
 const taskCompleteSound = new Audio("../audio/task_done.mp3");
+taskCompleteSound.addEventListener("error", () => {
+	console.warn("Failed to load task completion sound");
+});
 
 // Dark Mode Toggle
 const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
@@ -129,7 +132,7 @@ loadTasksFromStorage();
 // Function to add a task to the tasks array
 function addTask(taskText, completed = false) {
 	tasks.unshift({
-		text: taskText,
+		text: sanitizeInput(taskText),
 		completed: completed,
 	});
 	updateTasksInStorage();
@@ -150,6 +153,8 @@ function renderTasks() {
 		// Drag and Drop functionality
 		listItem.addEventListener("dragstart", handleDragStart);
 		listItem.addEventListener("dragover", handleDragOver);
+		listItem.addEventListener("dragend", handleDragEnd);
+		listItem.addEventListener("dragleave", handleDragLeave);
 		listItem.addEventListener("drop", handleDrop);
 
 		todoSrc = document.body.classList.contains("dark-mode") ? "../img/todo_dark.svg" : "../img/todo_light.svg";
@@ -198,6 +203,16 @@ function handleDragOver(event) {
 	event.target.classList.add("dragover"); // Optional visual feedback
 }
 
+function handleDragEnd(event) {
+	event.target.classList.remove("dragging");
+	// Remove dragover class from all items
+	document.querySelectorAll(".dragover").forEach((el) => el.classList.remove("dragover"));
+}
+
+function handleDragLeave(event) {
+	event.target.classList.remove("dragover");
+}
+
 function handleDrop(event) {
 	event.preventDefault();
 	const targetItemIndex = parseInt(event.target.getAttribute("data-task-index"));
@@ -227,7 +242,7 @@ function completeTask(index) {
 		let pointsEarned = 5;
 		awardSlayerPoints(pointsEarned);
 		showPointsAnimation("+5 SP", "points-gain"); // Show +SP
-		taskCompleteSound.play(); // Play the task complete sound
+		taskCompleteSound.play().catch(() => {}); // Play the task complete sound, ignore errors
 	} else if (!tasks[index].completed && wasCompleted) {
 		// Task was completed, but now marked as incomplete
 		let pointsToDeduct = 5;
@@ -308,6 +323,9 @@ function showPointsAnimation(pointsText, className) {
 }
 
 function createConfetti() {
+	// Clear any existing confetti first
+	confettiContainer.innerHTML = "";
+
 	for (let i = 0; i < numberOfConfetti; i++) {
 		const confetti = document.createElement("div");
 		confetti.classList.add("confetti");
@@ -324,6 +342,11 @@ function createConfetti() {
 
 		confettiContainer.appendChild(confetti);
 	}
+
+	// Remove confetti after animation completes (3 seconds)
+	setTimeout(() => {
+		confettiContainer.innerHTML = "";
+	}, 3000);
 }
 
 function updateGamificationUI() {
@@ -332,12 +355,25 @@ function updateGamificationUI() {
 
 	const nextLevel = currentLevel + 1;
 	const currentThreshold = levelThresholds[currentLevel];
-	const nextThreshold = levelThresholds[nextLevel] || slayerPoints; // If there's no next level, use current points as max
+	const nextThreshold = levelThresholds[nextLevel];
+
+	// If at max level, show full progress bar
+	if (!nextThreshold) {
+		levelProgressElement.style.width = "100%";
+		return;
+	}
+
 	const progress = Math.floor(((slayerPoints - currentThreshold) / (nextThreshold - currentThreshold)) * 100);
 	levelProgressElement.style.width = progress + "%";
 }
 
 // --- Helper Functions ---
+
+function sanitizeInput(text) {
+	const div = document.createElement("div");
+	div.textContent = text;
+	return div.innerHTML;
+}
 
 function createButton(imgSrc, onClick) {
 	const button = document.createElement("button");
@@ -380,14 +416,18 @@ function loadTasksFromStorage() {
 // --- Game Data Storage ---
 
 function saveGameData() {
-	localStorage.setItem("slayerPoints", slayerPoints);
-	localStorage.setItem("currentLevel", currentLevel);
+	chrome.storage.sync.set({
+		slayerPoints: slayerPoints,
+		currentLevel: currentLevel,
+	});
 }
 
 function loadGameData() {
-	slayerPoints = parseInt(localStorage.getItem("slayerPoints")) || 0;
-	currentLevel = parseInt(localStorage.getItem("currentLevel")) || 1;
-	updateGamificationUI(); // Update UI on load
+	chrome.storage.sync.get(["slayerPoints", "currentLevel"], (data) => {
+		slayerPoints = data.slayerPoints || 0;
+		currentLevel = data.currentLevel || 1;
+		updateGamificationUI(); // Update UI on load
+	});
 }
 
 // Close the modal when the user clicks outside of it

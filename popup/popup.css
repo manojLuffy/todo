@@ -102,6 +102,8 @@ h1 img {
 	align-items: center;
 	transition: all 0.4s ease;
 	color: var(--text-color); /* Use CSS variable for text color */
+	word-break: break-word;
+	overflow-wrap: break-word;
 }
 
 #task-list li.completed,
