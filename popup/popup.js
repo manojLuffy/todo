@@ -3,6 +3,12 @@ const taskList = document.getElementById("task-list");
 const slayedTaskList = document.getElementById("slayed-task-list");
 const newTaskInput = document.getElementById("new-task");
 const addTaskButton = document.getElementById("add-task");
+const addTaskBtn = document.getElementById("add-task-btn");
+const clearAllCompletedBtn = document.getElementById("clear-all-completed");
+const clearAllIcon = document.getElementById("clear-all-icon");
+const pendingTaskCount = document.getElementById("pending-task-count");
+const pendingQuirkyText = document.getElementById("pending-quirky-text");
+const slayedQuirkyText = document.getElementById("slayed-quirky-text");
 
 // Gamification UI elements
 const levelNameElement = document.getElementById("level-name");
@@ -33,6 +39,9 @@ let removeButtonSrc;
 let todoSrc;
 let completeSrc;
 
+// Icon sources
+let editSrc;
+
 // Load icons initially
 if (isDarkMode) {
 	toggleSwitch.checked = true;
@@ -41,11 +50,15 @@ if (isDarkMode) {
 	removeButtonSrc = "../img/remove_dark.svg";
 	todoSrc = "../img/todo_dark.svg";
 	completeSrc = "../img/complete_dark.svg";
+	editSrc = "../img/edit_dark.svg";
+	clearAllIcon.src = "../img/clear_dark.svg";
 } else {
 	addTaskButton.src = "../img/add_light.svg"; // Set light mode icon
 	removeButtonSrc = "../img/remove_light.svg";
 	todoSrc = "../img/todo_light.svg";
 	completeSrc = "../img/complete_light.svg";
+	editSrc = "../img/edit_light.svg";
+	clearAllIcon.src = "../img/clear_light.svg";
 }
 
 // Toggle Dark Mode
@@ -66,9 +79,11 @@ function switchTheme(e) {
 
 	// Update the icons
 	if (document.body.classList.contains("dark-mode")) {
-		addTaskButton.src = "../img/add_dark.svg"; // Set dark mode icon
+		addTaskButton.src = "../img/add_dark.svg";
+		clearAllIcon.src = "../img/clear_dark.svg";
 	} else {
-		addTaskButton.src = "../img/add_light.svg"; // Set light mode icon
+		addTaskButton.src = "../img/add_light.svg";
+		clearAllIcon.src = "../img/clear_light.svg";
 	}
 
 	renderTasks(); // Update the task lists
@@ -107,11 +122,12 @@ loadGameData();
 // Task and Game Logic
 
 // Add task functionality
-addTaskButton.addEventListener("click", () => {
+addTaskBtn.addEventListener("click", () => {
 	const taskText = newTaskInput.value.trim();
 	if (taskText) {
 		addTask(taskText);
 		newTaskInput.value = ""; // Clear input
+		newTaskInput.focus();
 	}
 });
 
@@ -126,8 +142,23 @@ newTaskInput.addEventListener("keypress", (e) => {
 	}
 });
 
+// Clear all completed tasks
+clearAllCompletedBtn.addEventListener("click", () => {
+	const completedCount = tasks.filter((t) => t.completed).length;
+	if (completedCount === 0) return;
+
+	if (confirm(`Are you sure you want to delete all ${completedCount} completed task${completedCount > 1 ? "s" : ""}?`)) {
+		tasks = tasks.filter((t) => !t.completed);
+		updateTasksInStorage();
+		renderTasks();
+	}
+});
+
 // Load tasks from storage
 loadTasksFromStorage();
+
+// Auto-focus input on popup open
+newTaskInput.focus();
 
 // Function to add a task to the tasks array
 function addTask(taskText, completed = false) {
@@ -144,11 +175,25 @@ function renderTasks() {
 	taskList.innerHTML = ""; // Clear existing tasks
 	slayedTaskList.innerHTML = "";
 
+	// Update icon sources based on current theme
+	const isDark = document.body.classList.contains("dark-mode");
+	todoSrc = isDark ? "../img/todo_dark.svg" : "../img/todo_light.svg";
+	completeSrc = isDark ? "../img/complete_dark.svg" : "../img/complete_light.svg";
+	removeButtonSrc = isDark ? "../img/remove_dark.svg" : "../img/remove_light.svg";
+	editSrc = isDark ? "../img/edit_dark.svg" : "../img/edit_light.svg";
+
 	tasks.forEach((task, index) => {
 		const listItem = document.createElement("li");
-		listItem.innerText = task.text;
-		listItem.setAttribute("data-task-index", index); // Function to render the tasks array to the UI
+		listItem.setAttribute("data-task-index", index);
+		listItem.setAttribute("role", "listitem");
+		listItem.setAttribute("tabindex", "0");
 		listItem.draggable = true;
+
+		// Task text span
+		const taskTextSpan = document.createElement("span");
+		taskTextSpan.classList.add("task-text");
+		taskTextSpan.textContent = task.text;
+		listItem.appendChild(taskTextSpan);
 
 		// Drag and Drop functionality
 		listItem.addEventListener("dragstart", handleDragStart);
@@ -157,22 +202,23 @@ function renderTasks() {
 		listItem.addEventListener("dragleave", handleDragLeave);
 		listItem.addEventListener("drop", handleDrop);
 
-		todoSrc = document.body.classList.contains("dark-mode") ? "../img/todo_dark.svg" : "../img/todo_light.svg";
-		completeSrc = document.body.classList.contains("dark-mode") ? "../img/complete_dark.svg" : "../img/complete_light.svg";
+		// Complete button
+		const completeButton = createButton(
+			task.completed ? completeSrc : todoSrc,
+			() => completeTask(index),
+			task.completed ? "Mark as incomplete" : "Mark as complete"
+		);
 
-		const completeButton = createButton(tasks[index].completed ? completeSrc : todoSrc, () => {
-			completeTask(index);
-		});
+		// Edit button
+		const editButton = createButton(editSrc, () => enterEditMode(listItem, index), "Edit task");
 
-		removeButtonSrc = document.body.classList.contains("dark-mode") ? "../img/remove_dark.svg" : "../img/remove_light.svg";
-
-		const removeButton = createButton(removeButtonSrc, () => {
-			deleteTask(index);
-		});
+		// Remove button
+		const removeButton = createButton(removeButtonSrc, () => deleteTask(index), "Delete task");
 
 		const groupedButtons = document.createElement("div");
 		groupedButtons.classList.add("grouped-buttons");
 		groupedButtons.appendChild(completeButton);
+		groupedButtons.appendChild(editButton);
 		groupedButtons.appendChild(removeButton);
 		listItem.appendChild(groupedButtons);
 
@@ -184,8 +230,8 @@ function renderTasks() {
 		}
 	});
 
-	updateCompletedTaskCount();
-	toggleQuirkyText();
+	updateTaskCounts();
+	toggleQuirkyTexts();
 }
 
 // --- Drag and Drop Handlers ---
@@ -258,6 +304,67 @@ function deleteTask(index) {
 	tasks.splice(index, 1);
 	updateTasksInStorage();
 	renderTasks();
+}
+
+// --- Edit Task Functions ---
+
+function enterEditMode(listItem, index) {
+	// Prevent multiple edit modes
+	if (listItem.classList.contains("editing")) return;
+
+	listItem.classList.add("editing");
+	listItem.draggable = false;
+
+	const taskTextSpan = listItem.querySelector(".task-text");
+	const currentText = tasks[index].text;
+
+	// Create edit input
+	const editInput = document.createElement("input");
+	editInput.type = "text";
+	editInput.classList.add("edit-input");
+	editInput.value = currentText;
+	editInput.maxLength = 200;
+	editInput.setAttribute("aria-label", "Edit task text");
+
+	// Replace text span with input
+	taskTextSpan.style.display = "none";
+	listItem.insertBefore(editInput, taskTextSpan);
+	editInput.focus();
+	editInput.select();
+
+	// Save on Enter, cancel on Escape
+	editInput.addEventListener("keydown", (e) => {
+		if (e.key === "Enter") {
+			saveEdit(listItem, index, editInput.value.trim());
+		} else if (e.key === "Escape") {
+			cancelEdit(listItem, taskTextSpan, editInput);
+		}
+	});
+
+	// Save on blur (clicking outside)
+	editInput.addEventListener("blur", () => {
+		// Small delay to allow for button clicks
+		setTimeout(() => {
+			if (listItem.classList.contains("editing")) {
+				saveEdit(listItem, index, editInput.value.trim());
+			}
+		}, 100);
+	});
+}
+
+function saveEdit(listItem, index, newText) {
+	if (newText && newText !== tasks[index].text) {
+		tasks[index].text = sanitizeInput(newText);
+		updateTasksInStorage();
+	}
+	renderTasks();
+}
+
+function cancelEdit(listItem, taskTextSpan, editInput) {
+	listItem.classList.remove("editing");
+	listItem.draggable = true;
+	taskTextSpan.style.display = "";
+	editInput.remove();
 }
 
 // --- Gamification Functions ---
@@ -375,27 +482,40 @@ function sanitizeInput(text) {
 	return div.innerHTML;
 }
 
-function createButton(imgSrc, onClick) {
+function createButton(imgSrc, onClick, ariaLabel) {
 	const button = document.createElement("button");
 	const img = document.createElement("img");
 	img.src = imgSrc;
+	img.alt = "";
 	button.appendChild(img);
 	button.addEventListener("click", onClick);
+	if (ariaLabel) {
+		button.setAttribute("aria-label", ariaLabel);
+		button.setAttribute("title", ariaLabel);
+	}
 	return button;
 }
 
-function updateCompletedTaskCount() {
+function updateTaskCounts() {
+	const pendingTasks = taskList.querySelectorAll("li").length;
 	const completedTasks = slayedTaskList.querySelectorAll("li.completed").length;
+
+	pendingTaskCount.textContent = pendingTasks;
 	document.getElementById("completed-task-count").textContent = completedTasks;
+
+	// Show/hide clear all button based on completed tasks
+	clearAllCompletedBtn.style.display = completedTasks > 0 ? "flex" : "none";
 }
 
-function toggleQuirkyText() {
-	const quirkyText = document.getElementById("quirky-text");
-	if (slayedTaskList.querySelectorAll("li.completed").length === 0) {
-		quirkyText.style.display = "block";
-	} else {
-		quirkyText.style.display = "none";
-	}
+function toggleQuirkyTexts() {
+	const pendingTasks = taskList.querySelectorAll("li").length;
+	const completedTasks = slayedTaskList.querySelectorAll("li.completed").length;
+
+	// Pending quirky text
+	pendingQuirkyText.style.display = pendingTasks === 0 ? "block" : "none";
+
+	// Slayed quirky text
+	slayedQuirkyText.style.display = completedTasks === 0 ? "block" : "none";
 }
 
 // --- Storage Management ---
@@ -408,8 +528,8 @@ function loadTasksFromStorage() {
 	chrome.storage.sync.get("tasks", (data) => {
 		if (data.tasks) {
 			tasks = data.tasks;
-			renderTasks();
 		}
+		renderTasks(); // Always render to update UI state
 	});
 }
 

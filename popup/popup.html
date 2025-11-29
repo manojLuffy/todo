@@ -12,7 +12,7 @@
 			<div>Task Slayer</div>
 			<div class="switch">
 				<label class="theme-switch" for="checkbox">
-					<input type="checkbox" id="checkbox" />
+					<input type="checkbox" id="checkbox" aria-label="Toggle dark mode" role="switch" />
 					<div class="slider round"></div>
 				</label>
 			</div>
@@ -36,16 +36,27 @@
 			</div>
 		</div>
 		<div id="input-container">
-			<input type="text" id="new-task" placeholder="Enter a new task" />
-			<img src="../img/add.svg" alt="Add Task" id="add-task" />
+			<input type="text" id="new-task" placeholder="Enter a new task" aria-label="New task input" maxlength="200" />
+			<button id="add-task-btn" aria-label="Add task" title="Add task">
+				<img src="../img/add.svg" alt="" id="add-task" />
+			</button>
 		</div>
 
-		<ul id="task-list"></ul>
+		<div id="pending-task-heading" role="heading" aria-level="2">Pending Tasks (<span id="pending-task-count">0</span>)</div>
+		<p id="pending-quirky-text" class="quirky-text" style="display: none">No tasks yet? Add one above and start slaying!</p>
 
-		<div id="slayed-task-heading">Slayed Tasks (<span id="completed-task-count">0</span>)</div>
-		<p id="quirky-text" style="display: none">Zero tasks defeated? Let's turn that around and become the ultimate Task Slayer!</p>
+		<ul id="task-list" role="list" aria-label="Pending tasks"></ul>
 
-		<ul id="slayed-task-list"></ul>
+		<div id="slayed-task-heading-container">
+			<div id="slayed-task-heading" role="heading" aria-level="2">Slayed Tasks (<span id="completed-task-count">0</span>)</div>
+			<button id="clear-all-completed" title="Clear all completed tasks" aria-label="Clear all completed tasks" style="display: none;">
+				<img src="../img/clear_light.svg" alt="Clear all" id="clear-all-icon" />
+				<span>Clear All</span>
+			</button>
+		</div>
+		<p id="slayed-quirky-text" class="quirky-text" style="display: none">Zero tasks defeated? Let's turn that around and become the ultimate Task Slayer!</p>
+
+		<ul id="slayed-task-list" role="list" aria-label="Completed tasks"></ul>
 
 		<script src="popup.js"></script>
 	</body>

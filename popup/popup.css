@@ -65,12 +65,21 @@ h1 img {
 	align-items: center;
 }
 
+#add-task-btn {
+	background: none;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-left: 5px;
+}
+
 #add-task {
 	width: 24px;
 	height: 24px;
-	cursor: pointer;
 	vertical-align: middle;
-	margin-left: 5px;
 }
 
 #new-task {
@@ -146,17 +155,58 @@ h1 img {
 	margin-top: 10px;
 }
 
+#pending-task-heading {
+	font-size: medium;
+	margin-bottom: 5px;
+}
+
+#slayed-task-heading-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 10px;
+}
+
 #slayed-task-heading {
 	font-size: medium;
+}
+
+#clear-all-completed {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 8px;
+	font-size: 12px;
+	color: var(--text-color);
+	background-color: transparent;
+	border: 1px solid var(--text-color);
+	border-radius: 4px;
+	cursor: pointer;
+	opacity: 0.7;
+	transition: opacity 0.2s, background-color 0.2s;
+}
+
+#clear-all-completed:hover {
+	opacity: 1;
+	background-color: rgba(244, 67, 54, 0.1);
+}
+
+#clear-all-completed img {
+	width: 14px;
+	height: 14px;
+}
+
+.quirky-text {
+	font-size: 13px;
+	color: #888;
+	text-align: center;
+	padding: 15px 10px;
+	font-style: italic;
 }
 
 #task-list li:hover,
 #slayed-task-list li:hover {
 	transform: scale(1.01);
-}
-
-#task-list {
-	margin-bottom: 20px;
 }
 
 #task-list {
@@ -203,6 +253,61 @@ h1 img {
 		opacity: 0;
 		transform: scale(0.8);
 	}
+}
+
+/* ================ EDIT MODE STYLES ================ */
+
+.task-text {
+	flex: 1;
+	min-width: 0;
+}
+
+.edit-input {
+	flex: 1;
+	min-width: 0;
+	padding: 4px 8px;
+	font-size: 14px;
+	border: 1px solid #4caf50;
+	border-radius: 4px;
+	outline: none;
+	background-color: var(--task-bg);
+	color: var(--text-color);
+}
+
+.edit-input:focus {
+	box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.3);
+}
+
+#task-list li.editing,
+#slayed-task-list li.editing {
+	background-color: var(--task-bg);
+	box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.3);
+}
+
+/* ================ KEYBOARD FOCUS STYLES ================ */
+
+button:focus-visible,
+input:focus-visible {
+	outline: 2px solid #4caf50;
+	outline-offset: 2px;
+}
+
+#task-list button:focus-visible,
+#slayed-task-list button:focus-visible {
+	outline: 2px solid #4caf50;
+	outline-offset: 1px;
+	border-radius: 4px;
+}
+
+.theme-switch input:focus-visible + .slider {
+	outline: 2px solid #4caf50;
+	outline-offset: 2px;
+}
+
+#task-list li:focus-visible,
+#slayed-task-list li:focus-visible {
+	outline: 2px solid #4caf50;
+	outline-offset: 2px;
 }
 
 /* ================ GAMIFICATION STYLES ================ */
@@ -668,6 +773,19 @@ body.dark-mode #close-modal {
 
 body.dark-mode #close-modal:hover {
 	background-color: #0056b3; /* Darker blue on hover */
+}
+
+body.dark-mode .quirky-text {
+	color: #666;
+}
+
+body.dark-mode #clear-all-completed:hover {
+	background-color: rgba(244, 67, 54, 0.2);
+}
+
+body.dark-mode .edit-input {
+	background-color: #333;
+	border-color: #4caf50;
 }
 
 /* Dark mode slider css */
